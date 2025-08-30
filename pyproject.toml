@@ -30,5 +30,5 @@ Documentation = "https://github.com/maxkapur/dated.py"
 Repository = "https://github.com/maxkapur/dated.py.git"
 "Bug Tracker" = "https://github.com/maxkapur/dated.py/issues"
 
-# [project.scripts]
-# dated = dated:main
+[project.scripts]
+dated = "dated:main"
