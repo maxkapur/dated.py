@@ -21,6 +21,7 @@ license-files = ["LICEN[CS]E.*"]
 [project.optional-dependencies]
 dev = [
   "pytest",
+  "ruff",
 ]
 
 [project.urls]
