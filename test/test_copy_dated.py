@@ -17,10 +17,14 @@ NOW = date.fromisoformat("2025-01-01")
         ("whatever.txt", "2025-01-01_whatever.txt"),
         ("25_this_is_fine.jpg", "2025-01-01_25_this_is_fine.jpg"),
         ("this_too.html", "2025-01-01_this_too.html"),
+        # Complex path
+        ("in/a/subdir/1999-01-01_whatever.txt", "in/a/subdir/2025-01-01_whatever.txt"),
+        ("in/a/subdir/whatever.txt", "in/a/subdir/2025-01-01_whatever.txt"),
     ],
 )
 def test_infile_file(filename: str, expected: str, tmp_path: Path):
     infile = tmp_path / filename
+    infile.parent.mkdir(parents=True, exist_ok=True)
     infile.touch()
     dated.copy_dated(infile, NOW)
     assert (tmp_path / expected).is_file(), list(tmp_path.glob("**/*"))
@@ -37,6 +41,9 @@ def test_infile_file(filename: str, expected: str, tmp_path: Path):
         ("whatever", "2025-01-01_whatever"),
         ("25_this_is_fine", "2025-01-01_25_this_is_fine"),
         ("this_too", "2025-01-01_this_too"),
+        # Complex path
+        ("in/a/subdir/1999-01-01_whatever", "in/a/subdir/2025-01-01_whatever"),
+        ("in/a/subdir/whatever", "in/a/subdir/2025-01-01_whatever"),
     ],
 )
 def test_infile_dir(filename: str, expected: str, tmp_path: Path):
