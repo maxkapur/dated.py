@@ -42,8 +42,10 @@ def copy_dated(infile: Path, now: date = date.today()) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("infile")
+    parser = argparse.ArgumentParser(
+        description="Create a new copy of a file or directory with today's date as a prefix"
+    )
+    parser.add_argument("infile", help="Input file/directory to dated")
     parsed = parser.parse_args()
     infile = Path(parsed.infile)
     return copy_dated(infile)
