@@ -20,6 +20,7 @@ license-files = ["LICEN[CS]E.*"]
 
 [project.optional-dependencies]
 dev = [
+  "mypy",
   "pytest",
   "ruff",
 ]
@@ -32,3 +33,6 @@ Repository = "https://github.com/maxkapur/dated.py.git"
 
 [project.scripts]
 dated = "dated:main"
+
+[[tool.mypy.overrides]]
+module = "dated"
