@@ -32,10 +32,10 @@ def copy_dated(inpath: Path, today: date = date.today()) -> None:
 
     dest = inpath.parent / with_current_date(inpath.name, today)
     if inpath.is_file():
-        stderr.write(f"copy2({inpath}, {dest})")
+        stderr.write(f"copy2({inpath}, {dest})\n")
         shutil.copy2(inpath, dest)
     elif inpath.is_dir():
-        stderr.write(f"copytree({inpath}, {dest})")
+        stderr.write(f"copytree({inpath}, {dest})\n")
         shutil.copytree(inpath, dest)
     else:
         raise ValueError(f"{inpath} is neither a file nor a directory")
