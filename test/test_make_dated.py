@@ -1,9 +1,10 @@
-import dated
-import pytest
-from pathlib import Path
 import uuid
 from datetime import date as Date
+from pathlib import Path
 
+import pytest
+
+import dated
 
 NOW = Date.fromisoformat("2025-01-01")
 

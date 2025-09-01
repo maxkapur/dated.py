@@ -1,6 +1,8 @@
-import dated
-import pytest
 from datetime import date as Date
+
+import pytest
+
+import dated
 
 
 @pytest.mark.parametrize(

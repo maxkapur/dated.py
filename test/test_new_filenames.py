@@ -1,8 +1,10 @@
-import dated
-import pytest
-from datetime import date
+from datetime import date as Date
 
-NOW = date.fromisoformat("2025-01-01")
+import pytest
+
+import dated
+
+NOW = Date.fromisoformat("2025-01-01")
 
 
 @pytest.mark.parametrize(

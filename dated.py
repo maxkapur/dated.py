@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 import argparse
-import re
-
-from datetime import date as Date
-
 import enum
-from sys import stderr
+import re
 import shutil
-
-from typing import NamedTuple
-
+from datetime import date as Date
 from pathlib import Path
-
 from string import ascii_lowercase as ASCII_LOWERCASE
+from sys import stderr
+from typing import NamedTuple
 
 
 class FilenameStyle(enum.Enum):
