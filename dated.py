@@ -30,8 +30,23 @@ class FilenameStyle(enum.Enum):
             return cls.BARE, None, None
 
 
-def with_current_date(filename: str, today: date = date.today()) -> str:
+def new_filenames(filename: str, today: date = date.today()) -> tuple[str, str]:
+    old_filename_style, old_date, old_letter = FilenameStyle.from_filename(filename)
     nowstamp = today.strftime(r"%Y-%m-%d")
+    if old_filename_style == FilenameStyle.BARE:
+        # We don't know the previous date, so just give the old file today's
+        # date and an "a" prefix
+        return f"{nowstamp}_a_{filename}", f"{nowstamp}_b_{filename}"
+
+    assert old_date is not None
+    thenstamp = old_date.strftime(r"%Y-%m-%d")
+
+    if old_filename_style == FilenameStyle.WITH_DATESTAMP:
+        assert old_date is not None
+        if old_date == today:
+            assert thenstamp == nowstamp
+            return f"{thenstamp}_a_"
+
     m = re.match(STARTS_WITH_TIMESTAMP, filename)
     if not m:
         return f"{nowstamp}_{filename}"
