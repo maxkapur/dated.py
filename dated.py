@@ -82,34 +82,32 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
     Return `old_dest_name` (to which the original file should be moved) and
     `new_dest_name` (to which the original should be copied) as a tuple.
     """
-    parts = FilenameParts.from_filename(filename)
     nowstamp = today.strftime(r"%Y-%m-%d")
-    if parts.style == FilenameStyle.BARE:
-        # We don't know the previous date, so just give the old file today's
-        # date and add letter prefixes
-        return f"{nowstamp}_a_{filename}", f"{nowstamp}_b_{filename}"
 
-    assert parts.date is not None
-    thenstamp = parts.date.strftime(r"%Y-%m-%d")
-
-    if parts.style == FilenameStyle.WITH_DATESTAMP:
-        if parts.date == today:
-            assert thenstamp == nowstamp
-            return f"{thenstamp}_a_{parts.basename}", f"{thenstamp}_b_{parts.basename}"
-        else:
-            return f"{thenstamp}_{parts.basename}", f"{nowstamp}_{parts.basename}"
-
-    if parts.style == FilenameStyle.WITH_DATESTAMP_AND_LETTER:
-        assert parts.letter is not None
-        if parts.date == today:
-            assert thenstamp == nowstamp
-            new_letter = chr(ord(parts.letter) + 1)
+    match FilenameParts.from_filename(filename):
+        case [FilenameStyle.BARE, _, _, basename]:
+            # We don't know the previous date, so just give the old file today's
+            # date and add letter prefixes
+            assert filename == basename
+            return f"{nowstamp}_a_{filename}", f"{nowstamp}_b_{filename}"
+        case [
+            FilenameStyle.WITH_DATESTAMP | FilenameStyle.WITH_DATESTAMP_AND_LETTER,
+            date,
+            _,
+            basename,
+        ] if date != today:
+            return filename, f"{nowstamp}_{basename}"
+        case [FilenameStyle.WITH_DATESTAMP, date, _, basename]:
+            assert date == today
+            return f"{nowstamp}_a_{basename}", f"{nowstamp}_b_{basename}"
+        case [FilenameStyle.WITH_DATESTAMP_AND_LETTER, date, letter, basename]:
+            assert date == today
+            assert letter is not None
+            new_letter = chr(ord(letter) + 1)
             assert new_letter in ASCII_LOWERCASE  # TODO: helpful error
-            return filename, f"{thenstamp}_{new_letter}_{parts.basename}"
-        else:
-            return filename, f"{nowstamp}_{parts.basename}"
-
-    raise ValueError(f"Unknown filename style {parts.style}")
+            return filename, f"{nowstamp}_{new_letter}_{basename}"
+        case parts:
+            raise ValueError(f"Unable to parse {parts}")
 
 
 def make_dated(inpath: Path, today: Date = Date.today()) -> list[str]:
