@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""Apply my filename convention to a given file or directory.
+
+1. If the input file has a date, make a copy with today's date.
+2. If the input file has today's date, insert `_a` and `_b` suffixes, or advance
+   an existing letter suffix.
+3. If the input file has no date, insert today's date and apply case 2.
+"""
+
 import argparse
 import enum
 import re
@@ -11,19 +19,40 @@ from typing import NamedTuple
 
 
 class FilenameStyle(enum.Enum):
+    """Enum of possible input filename conventions."""
+
     BARE = enum.auto()
+    """E.g. `something.txt`."""
+
     WITH_DATESTAMP = enum.auto()
+    """E.g. `2025-01-01_something.txt`."""
+
     WITH_DATESTAMP_AND_LETTER = enum.auto()
+    """E.g. `2025-01-01_b_something.txt` (version `b` from that day)."""
 
 
 class FilenameParts(NamedTuple):
+    """Parts of a filename that follows one of the `FilenameStyle`s."""
+
     style: FilenameStyle
+    """Style used by this filename."""
+
     date: Date | None
+    """The date embedded in the filename, if present."""
+
     letter: str | None
+    """The version letter embedded in the filename, if present."""
+
     basename: str
+    """The "rest" of the filename (without date or version letter)."""
 
     @classmethod
     def from_filename(cls, filename: str) -> "FilenameParts":
+        """Construct a `FilenameParts` tuple from `filename`.
+
+        Use regex to determine the `FilenameStyle` and extract parts.
+        """
+
         if m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_([a-z])_(.*$)", filename):
             return cls(
                 FilenameStyle.WITH_DATESTAMP_AND_LETTER,
@@ -48,6 +77,11 @@ class FilenameParts(NamedTuple):
 
 
 def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
+    """Construct new conventional filenames for the given input.
+
+    Return `old_dest_name` (to which the original file should be moved) and
+    `new_dest_name` (to which the original should be copied) as a tuple.
+    """
     parts = FilenameParts.from_filename(filename)
     nowstamp = today.strftime(r"%Y-%m-%d")
     if parts.style == FilenameStyle.BARE:
@@ -79,6 +113,10 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
 
 
 def make_dated(inpath: Path, today: Date = Date.today()) -> list[str]:
+    """Copy and rename `inpath` as necessary to apply the filename convention.
+
+    Log what happened to `stderr`.
+    """
     if not inpath.exists():
         raise FileNotFoundError(f"{inpath} doesn't exist")
 
