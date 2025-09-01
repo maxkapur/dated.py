@@ -8,7 +8,6 @@
 """
 
 import argparse
-import enum
 import re
 import shutil
 from datetime import date as Date
@@ -18,24 +17,8 @@ from sys import stderr
 from typing import NamedTuple
 
 
-class FilenameStyle(enum.Enum):
-    """Enum of possible input filename conventions."""
-
-    BARE = enum.auto()
-    """E.g. `something.txt`."""
-
-    WITH_DATESTAMP = enum.auto()
-    """E.g. `2025-01-01_something.txt`."""
-
-    WITH_DATESTAMP_AND_LETTER = enum.auto()
-    """E.g. `2025-01-01_b_something.txt` (version `b` from that day)."""
-
-
 class FilenameParts(NamedTuple):
-    """Parts of a filename that follows one of the `FilenameStyle`s."""
-
-    style: FilenameStyle
-    """Style used by this filename."""
+    """Parts of a conventional filename."""
 
     date: Date | None
     """The date embedded in the filename, if present."""
@@ -50,30 +33,18 @@ class FilenameParts(NamedTuple):
     def from_filename(cls, filename: str) -> "FilenameParts":
         """Construct a `FilenameParts` tuple from `filename`.
 
-        Use regex to determine the `FilenameStyle` and extract parts.
+        Use regex to determine the filename structure and extract parts.
         """
 
         if m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_([a-z])_(.*$)", filename):
-            return cls(
-                FilenameStyle.WITH_DATESTAMP_AND_LETTER,
-                Date.fromisoformat(m.group(1)),
-                m.group(2),
-                m.group(3),
-            )
+            # Filename with date and version letter
+            return cls(Date.fromisoformat(m.group(1)), m.group(2), m.group(3))
         elif m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_(.*$)", filename):
-            return cls(
-                FilenameStyle.WITH_DATESTAMP,
-                Date.fromisoformat(m.group(1)),
-                None,
-                m.group(2),
-            )
+            # Filename with date only
+            return cls(Date.fromisoformat(m.group(1)), None, m.group(2))
         else:
-            return cls(
-                FilenameStyle.BARE,
-                None,
-                None,
-                filename,
-            )
+            # Bare filename
+            return cls(None, None, filename)
 
 
 def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
@@ -85,22 +56,25 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
     nowstamp = today.strftime(r"%Y-%m-%d")
 
     match FilenameParts.from_filename(filename):
-        case [FilenameStyle.BARE, _, _, basename]:
+        case [None, None, basename]:
             # We don't know the previous date, so just give the old file today's
             # date and add letter prefixes
             assert filename == basename
             return f"{nowstamp}_a_{filename}", f"{nowstamp}_b_{filename}"
         case [
-            FilenameStyle.WITH_DATESTAMP | FilenameStyle.WITH_DATESTAMP_AND_LETTER,
             date,
             _,
             basename,
         ] if date != today:
+            # Date given but it isn't today: Original filename prevails
             return filename, f"{nowstamp}_{basename}"
-        case [FilenameStyle.WITH_DATESTAMP, date, _, basename]:
+        case [date, None, basename]:
+            # Date is today and no version letter: Create one (this is actually
+            # the same as the first case)
             assert date == today
             return f"{nowstamp}_a_{basename}", f"{nowstamp}_b_{basename}"
-        case [FilenameStyle.WITH_DATESTAMP_AND_LETTER, date, letter, basename]:
+        case [date, letter, basename]:
+            # Date is today and already have a version letter: Advance it
             assert date == today
             assert letter is not None
             new_letter = chr(ord(letter) + 1)

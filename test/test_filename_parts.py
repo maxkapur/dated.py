@@ -14,10 +14,9 @@ import dated
     ],
 )
 def test_from_filename__bare(filename: str):
-    style_parsed, date_parsed, letter_parsed, basename_parsed = (
-        dated.FilenameParts.from_filename(filename)
+    date_parsed, letter_parsed, basename_parsed = dated.FilenameParts.from_filename(
+        filename
     )
-    assert style_parsed == dated.FilenameStyle.BARE
     assert date_parsed is None
     assert letter_parsed is None
     assert basename_parsed == filename
@@ -34,10 +33,9 @@ def test_from_filename__bare(filename: str):
 def test_from_filename__with_datestamp(
     filename: str, date_expected: Date, basename_expected: str
 ):
-    style_parsed, date_parsed, letter_parsed, basename_parsed = (
-        dated.FilenameParts.from_filename(filename)
+    date_parsed, letter_parsed, basename_parsed = dated.FilenameParts.from_filename(
+        filename
     )
-    assert style_parsed == dated.FilenameStyle.WITH_DATESTAMP
     assert date_parsed == date_expected
     assert letter_parsed is None
     assert basename_parsed == basename_expected
@@ -54,10 +52,9 @@ def test_from_filename__with_datestamp(
 def test_from_filename__with_datestamp_and_letter(
     filename: str, date_expected: Date, letter_expected: str, basename_expected: str
 ):
-    style_parsed, date_parsed, letter_parsed, basename_parsed = (
-        dated.FilenameParts.from_filename(filename)
+    date_parsed, letter_parsed, basename_parsed = dated.FilenameParts.from_filename(
+        filename
     )
-    assert style_parsed == dated.FilenameStyle.WITH_DATESTAMP_AND_LETTER
     assert date_parsed == date_expected
     assert letter_parsed == letter_expected
     assert basename_parsed == basename_expected
