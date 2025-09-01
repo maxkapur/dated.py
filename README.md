@@ -41,7 +41,7 @@ datestamping conventions to create a working copy of a file or directory.
 ## Installation
 
 ```shell
-pipx install "https://github.com/maxkapur/dated.py"
+pipx install 'https://github.com/maxkapur/dated.py/archive/refs/heads/main.tar.gz'
 ```
 
 ## Usage
