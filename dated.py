@@ -12,6 +12,8 @@ from typing import NamedTuple
 
 from pathlib import Path
 
+from string import ascii_lowercase as ASCII_LOWERCASE
+
 
 class FilenameStyle(enum.Enum):
     BARE = enum.auto()
@@ -51,32 +53,34 @@ class FilenameParts(NamedTuple):
 
 
 def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
-    old_filename_style, old_date, old_letter = FilenameStyle.from_filename(filename)
+    parts = FilenameParts.from_filename(filename)
     nowstamp = today.strftime(r"%Y-%m-%d")
-    if old_filename_style == FilenameStyle.BARE:
+    if parts.style == FilenameStyle.BARE:
         # We don't know the previous date, so just give the old file today's
-        # date and an "a" prefix
+        # date and add letter prefixes
         return f"{nowstamp}_a_{filename}", f"{nowstamp}_b_{filename}"
 
-    assert old_date is not None
-    thenstamp = old_date.strftime(r"%Y-%m-%d")
+    assert parts.date is not None
+    thenstamp = parts.date.strftime(r"%Y-%m-%d")
 
-    if old_filename_style == FilenameStyle.WITH_DATESTAMP:
-        assert old_date is not None
-        if old_date == today:
+    if parts.style == FilenameStyle.WITH_DATESTAMP:
+        if parts.date == today:
             assert thenstamp == nowstamp
-            return f"{thenstamp}_a_"
+            return f"{thenstamp}_a_{parts.basename}", f"{thenstamp}_b_{parts.basename}"
+        else:
+            return f"{thenstamp}_{parts.basename}", f"{nowstamp}_{parts.basename}"
 
-    m = re.match(STARTS_WITH_TIMESTAMP, filename)
-    if not m:
-        return f"{nowstamp}_{filename}"
+    if parts.style == FilenameStyle.WITH_DATESTAMP_AND_LETTER:
+        assert parts.letter is not None
+        if parts.date == today:
+            assert thenstamp == nowstamp
+            new_letter = chr(ord(parts.letter) + 1)
+            assert new_letter in ASCII_LOWERCASE  # TODO: helpful error
+            return filename, f"{thenstamp}_{new_letter}_{parts.basename}"
+        else:
+            return filename, f"{nowstamp}_{parts.basename}"
 
-    rest_of_filename = filename[m.span()[1] :]
-    then = date.fromisoformat(m.group(1))
-    if then == today:
-        raise ValueError(f"{filename} already begins with today's date!")
-
-    return f"{nowstamp}_{rest_of_filename}"
+    raise ValueError(f"Unknown filename style {parts.style}")
 
 
 def copy_dated(inpath: Path, today: Date = Date.today()) -> None:
