@@ -4,12 +4,30 @@ import re
 
 from datetime import date
 
+import enum
 from sys import stderr
 import shutil
 
 from pathlib import Path
 
-STARTS_WITH_TIMESTAMP = re.compile(r"(\d\d\d\d\-\d\d\-\d\d)_")
+
+class FilenameStyle(enum.Enum):
+    BARE = enum.auto()
+    WITH_DATESTAMP = enum.auto()
+    WITH_DATESTAMP_AND_LETTER = enum.auto()
+
+    @classmethod
+    def from_filename(cls, filename: str):
+        if m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_([a-z])_", filename):
+            return (
+                cls.WITH_DATESTAMP_AND_LETTER,
+                date.fromisoformat(m.group(1)),
+                m.group(2),
+            )
+        elif m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_", filename):
+            return cls.WITH_DATESTAMP, date.fromisoformat(m.group(1)), None
+        else:
+            return cls.BARE, None, None
 
 
 def with_current_date(filename: str, today: date = date.today()) -> str:
