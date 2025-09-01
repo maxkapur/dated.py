@@ -2,11 +2,13 @@
 import argparse
 import re
 
-from datetime import date
+from datetime import date as Date
 
 import enum
 from sys import stderr
 import shutil
+
+from typing import NamedTuple
 
 from pathlib import Path
 
@@ -16,21 +18,39 @@ class FilenameStyle(enum.Enum):
     WITH_DATESTAMP = enum.auto()
     WITH_DATESTAMP_AND_LETTER = enum.auto()
 
+
+class FilenameParts(NamedTuple):
+    style: FilenameStyle
+    date: Date | None
+    letter: str | None
+    basename: str
+
     @classmethod
     def from_filename(cls, filename: str):
-        if m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_([a-z])_", filename):
-            return (
-                cls.WITH_DATESTAMP_AND_LETTER,
-                date.fromisoformat(m.group(1)),
+        if m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_([a-z])_(.*$)", filename):
+            return cls(
+                FilenameStyle.WITH_DATESTAMP_AND_LETTER,
+                Date.fromisoformat(m.group(1)),
+                m.group(2),
+                m.group(3),
+            )
+        elif m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_(.*$)", filename):
+            return cls(
+                FilenameStyle.WITH_DATESTAMP,
+                Date.fromisoformat(m.group(1)),
+                None,
                 m.group(2),
             )
-        elif m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_", filename):
-            return cls.WITH_DATESTAMP, date.fromisoformat(m.group(1)), None
         else:
-            return cls.BARE, None, None
+            return cls(
+                FilenameStyle.BARE,
+                None,
+                None,
+                filename,
+            )
 
 
-def new_filenames(filename: str, today: date = date.today()) -> tuple[str, str]:
+def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
     old_filename_style, old_date, old_letter = FilenameStyle.from_filename(filename)
     nowstamp = today.strftime(r"%Y-%m-%d")
     if old_filename_style == FilenameStyle.BARE:
@@ -59,7 +79,7 @@ def new_filenames(filename: str, today: date = date.today()) -> tuple[str, str]:
     return f"{nowstamp}_{rest_of_filename}"
 
 
-def copy_dated(inpath: Path, today: date = date.today()) -> None:
+def copy_dated(inpath: Path, today: Date = Date.today()) -> None:
     if not inpath.exists():
         raise FileNotFoundError(f"{inpath} doesn't exist")
 
