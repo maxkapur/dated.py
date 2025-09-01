@@ -126,4 +126,4 @@ def main():
     parser.add_argument("inpath", help="Input file/directory to dated")
     parsed = parser.parse_args()
     inpath = Path(parsed.inpath)
-    return copy_dated(inpath)
+    return make_dated(inpath)
