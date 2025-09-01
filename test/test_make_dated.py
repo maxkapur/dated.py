@@ -35,6 +35,7 @@ def test_make_dated__file(filename: str, old_dest: str, new_dest: str, tmp_path:
     infile = tmp_path / str(uuid.uuid4()) / filename
     infile.parent.mkdir(parents=True, exist_ok=True)
     infile.touch()
+
     dated.make_dated(infile, NOW)
 
     expected = [infile.parent / old_dest, infile.parent / new_dest]
