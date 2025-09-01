@@ -53,33 +53,31 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
     Return `old_dest_name` (to which the original file should be moved) and
     `new_dest_name` (to which the original should be copied) as a tuple.
     """
-    nowstamp = today.strftime(r"%Y-%m-%d")
+    todaystamp = today.strftime(r"%Y-%m-%d")
 
     match FilenameParts.from_filename(filename):
-        case [None, None, basename]:
-            # We don't know the previous date, so just give the old file today's
-            # date and add letter prefixes
-            assert filename == basename
-            return f"{nowstamp}_a_{filename}", f"{nowstamp}_b_{filename}"
-        case [
-            date,
-            _,
-            basename,
-        ] if date != today:
+        case FilenameParts(date=None, letter=None, basename=basename):
+            # Bare filename. We don't know the previous date, so just give the
+            # old file today's date and add letter prefixes
+            assert basename == filename
+            return f"{todaystamp}_a_{filename}", f"{todaystamp}_b_{filename}"
+        case FilenameParts(date=date, basename=basename) if date != today:
             # Date given but it isn't today: Original filename prevails
-            return filename, f"{nowstamp}_{basename}"
-        case [date, None, basename]:
+            # regardless of whether there was a letter
+            return filename, f"{todaystamp}_{basename}"
+        case FilenameParts(date=date, letter=None, basename=basename):
             # Date is today and no version letter: Create one (this is actually
             # the same as the first case)
             assert date == today
-            return f"{nowstamp}_a_{basename}", f"{nowstamp}_b_{basename}"
-        case [date, letter, basename]:
+            return f"{todaystamp}_a_{basename}", f"{todaystamp}_b_{basename}"
+        case FilenameParts(date=date, letter=letter, basename=basename):
             # Date is today and already have a version letter: Advance it
             assert date == today
-            assert letter is not None
-            new_letter = chr(ord(letter) + 1)
-            assert new_letter in ASCII_LOWERCASE  # TODO: helpful error
-            return filename, f"{nowstamp}_{new_letter}_{basename}"
+            assert isinstance(letter, str)
+            next_letter = chr(ord(letter) + 1)
+            if next_letter not in ASCII_LOWERCASE:
+                raise ValueError(f"No letter after {letter}")
+            return filename, f"{todaystamp}_{next_letter}_{basename}"
         case parts:
             raise ValueError(f"Unable to parse {parts}")
 
