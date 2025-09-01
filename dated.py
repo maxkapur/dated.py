@@ -23,7 +23,7 @@ class FilenameParts(NamedTuple):
     basename: str
 
     @classmethod
-    def from_filename(cls, filename: str):
+    def from_filename(cls, filename: str) -> "FilenameParts":
         if m := re.match(r"(\d\d\d\d\-\d\d\-\d\d)_([a-z])_(.*$)", filename):
             return cls(
                 FilenameStyle.WITH_DATESTAMP_AND_LETTER,
@@ -78,7 +78,7 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
     raise ValueError(f"Unknown filename style {parts.style}")
 
 
-def make_dated(inpath: Path, today: Date = Date.today()) -> None:
+def make_dated(inpath: Path, today: Date = Date.today()) -> list[str]:
     if not inpath.exists():
         raise FileNotFoundError(f"{inpath} doesn't exist")
 
@@ -114,11 +114,11 @@ def make_dated(inpath: Path, today: Date = Date.today()) -> None:
     return operations
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a new copy of a file or directory with today's date as a prefix"
     )
     parser.add_argument("inpath", help="Input file/directory to dated")
     parsed = parser.parse_args()
     inpath = Path(parsed.inpath)
-    return make_dated(inpath)
+    make_dated(inpath)
