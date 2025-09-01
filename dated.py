@@ -160,3 +160,7 @@ def main() -> None:
     parsed = parser.parse_args()
     inpath = Path(parsed.inpath)
     make_dated(inpath)
+
+
+if __name__ == "__main__":
+    main()
