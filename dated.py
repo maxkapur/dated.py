@@ -83,19 +83,40 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
     raise ValueError(f"Unknown filename style {parts.style}")
 
 
-def copy_dated(inpath: Path, today: Date = Date.today()) -> None:
+def make_dated(inpath: Path, today: Date = Date.today()) -> None:
     if not inpath.exists():
         raise FileNotFoundError(f"{inpath} doesn't exist")
 
-    dest = inpath.parent / with_current_date(inpath.name, today)
-    if inpath.is_file():
-        stderr.write(f"copy2({inpath}, {dest})\n")
-        shutil.copy2(inpath, dest)
-    elif inpath.is_dir():
-        stderr.write(f"copytree({inpath}, {dest})\n")
-        shutil.copytree(inpath, dest)
+    old_dest_name, new_dest_name = new_filenames(inpath.name, today)
+    old_dest = inpath.parent / old_dest_name
+    new_dest = inpath.parent / new_dest_name
+    assert old_dest != new_dest
+    assert not new_dest.exists()
+
+    operations: list[str] = []
+    if old_dest != inpath:
+        # Move the original file if required, e.g. because we are adding a
+        # datestamp or letter
+        assert not old_dest.exists()
+        op = f"move({inpath}, {old_dest})"
+        operations.append(op)
+        stderr.write(f"{op}\n")
+        shutil.move(inpath, old_dest)
+
+    if old_dest.is_file():
+        op = f"copy2({inpath}, {new_dest})"
+        operations.append(op)
+        stderr.write(f"{op}\n")
+        shutil.copy2(old_dest, new_dest)
+    elif old_dest.is_dir():
+        op = f"copytree({inpath}, {new_dest})"
+        operations.append(op)
+        stderr.write(f"{op}\n")
+        shutil.copytree(old_dest, new_dest)
     else:
         raise ValueError(f"{inpath} is neither a file nor a directory")
+
+    return operations
 
 
 def main():
