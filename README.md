@@ -31,12 +31,15 @@ datestamping conventions to create a working copy of a file or directory.
 
    ```shell
    $ touch undated.txt
-   $ dated demo.txt
+   $ dated undated.txt
    move(undated.txt, 2025-09-01_a_undated.txt)
    copy2(undated.txt, 2025-09-01_b_undated.txt)
    $ ls
    2025-09-01_a_undated.txt  2025-09-01_b_undated.txt
    ```
+
+The logging output `move(undated.txt, 2025-09-01_a_undated.txt)` is written to
+`stderr` and can be suppressed with e.g. `dated undated.txt 2>/dev/null`.
 
 ## Installation
 
