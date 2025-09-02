@@ -15,7 +15,7 @@ datestamping conventions to create a working copy of a file or directory.
    ```
 
 2. If the input file's datestamp is already today, then insert suffixes `_a`
-   (original) and `_b` (copy) before the date:
+   (original) and `_b` (copy) after the date:
 
    ```shell
    $ touch (date -Idate)_already_dated_today.txt
