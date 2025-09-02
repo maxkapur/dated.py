@@ -36,3 +36,6 @@ dated = "dated:main"
 
 [[tool.mypy.overrides]]
 module = "dated"
+
+[tool.ruff.lint]
+extend-select = ["I"]
