@@ -2,19 +2,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+import mypy.api
+
 REPO_ROOT = Path(".").parent.parent
 
 
 def test_mypy():
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "mypy",
-            REPO_ROOT / "dated.py",
-            *(REPO_ROOT / "test").glob("**/*.py"),
-        ]
-    ).check_returncode()
+    stdout, stderr, returncode = mypy.api.run([str(REPO_ROOT)])
+    sys.stdout.write(stdout)
+    sys.stderr.write(stderr)
+    assert returncode == 0
 
 
 def test_ruff():

@@ -34,8 +34,5 @@ Repository = "https://github.com/maxkapur/dated.py.git"
 [project.scripts]
 dated = "dated:main"
 
-[[tool.mypy.overrides]]
-module = "dated"
-
 [tool.ruff.lint]
 extend-select = ["I"]
