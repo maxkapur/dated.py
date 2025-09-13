@@ -44,7 +44,7 @@ The logging output `move(undated.txt, 2025-09-01_a_undated.txt)` is written to
 ## Installation
 
 ```shell
-pipx install 'https://github.com/maxkapur/dated.py/archive/refs/heads/main.tar.gz'
+pipx install 'git+https://github.com/maxkapur/dated.py'
 ```
 
 ## Usage
