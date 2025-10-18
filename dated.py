@@ -13,7 +13,7 @@ import shutil
 from datetime import date as Date
 from pathlib import Path
 from string import ascii_lowercase as ASCII_LOWERCASE
-from sys import stderr
+from sys import stderr, stdout
 from typing import NamedTuple
 
 
@@ -118,6 +118,7 @@ def make_dated(inpath: Path, today: Date = Date.today()) -> list[str]:
         shutil.copytree(old_dest, new_dest)
     else:
         raise ValueError(f"{inpath} is neither a file nor a directory")
+    stdout.write(str(new_dest))
 
     return operations
 

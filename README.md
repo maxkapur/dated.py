@@ -10,6 +10,7 @@ datestamping conventions to create a working copy of a file or directory.
    $ touch 2025-01-01_already_dated.txt
    $ dated 2025-01-01_already_dated.txt
    copy2(2025-01-01_already_dated.txt, 2025-08-31_already_dated.txt)
+   2025-08-31_already_dated.txt
    $ ls
    2025-01-01_already_dated.txt  2025-08-31_already_dated.txt
    ```
@@ -22,6 +23,7 @@ datestamping conventions to create a working copy of a file or directory.
    $ dated (date -Idate)_already_dated_today.txt
    move(2025-09-01_already_dated_today.txt, 2025-09-01_a_already_dated_today.txt)
    copy2(2025-09-01_already_dated_today.txt, 2025-09-01_b_already_dated_today.txt)
+   2025-09-01_b_already_dated_today.txt
    $ ls
    2025-09-01_a_already_dated_today.txt  2025-09-01_b_already_dated_today.txt
    ```
@@ -34,12 +36,24 @@ datestamping conventions to create a working copy of a file or directory.
    $ dated undated.txt
    move(undated.txt, 2025-09-01_a_undated.txt)
    copy2(undated.txt, 2025-09-01_b_undated.txt)
+   2025-09-01_b_undated.txt
    $ ls
    2025-09-01_a_undated.txt  2025-09-01_b_undated.txt
    ```
 
-The logging output `move(undated.txt, 2025-09-01_a_undated.txt)` is written to
-`stderr` and can be suppressed with e.g. `dated undated.txt 2>/dev/null`.
+The logging output (e.g. `move(undated.txt, 2025-09-01_a_undated.txt)`) is
+written to `stderr` and can be suppressed by redirection:
+
+```shell
+dated undated.txt 2>/dev/null
+```
+
+The new filename (e.g. `2025-09-01_b_already_dated_today.txt`) is written to
+`stdout` so you can do stuff like this:
+
+```shell
+micro $(dated notes.txt)
+```
 
 ## Installation
 
