@@ -14,8 +14,17 @@ def test_mypy():
     assert returncode == 0
 
 
-def test_ruff():
+def test_ruff_format():
     subprocess.run(
-        [sys.executable, "-m", "ruff", "format", "--check"]
-    ).check_returncode()
-    subprocess.run([sys.executable, "-m", "ruff", "check"]).check_returncode()
+        [sys.executable, "-m", "ruff", "format", "--check"],
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
+
+def test_ruff_lint():
+    subprocess.run(
+        [sys.executable, "-m", "ruff", "check"],
+        cwd=REPO_ROOT,
+        check=True,
+    )
