@@ -65,6 +65,7 @@ pipx install 'git+https://github.com/maxkapur/dated.py'
 
 ```shell
 dated path/to/some_file.docx  # Date is prepended to "some_file.docx"
+dated --open path/to/some_file.docx  # xdg-open the new file
 dated path/to/some_directory  # Date is prepended to "some_directory"
 ```
 
