@@ -13,6 +13,7 @@ import shutil
 from datetime import date as Date
 from pathlib import Path
 from string import ascii_lowercase as ASCII_LOWERCASE
+from subprocess import Popen
 from sys import stderr, stdout
 from typing import NamedTuple
 
@@ -82,10 +83,13 @@ def new_filenames(filename: str, today: Date = Date.today()) -> tuple[str, str]:
             raise ValueError(f"Unable to parse {parts}")
 
 
-def make_dated(inpath: Path, today: Date = Date.today()) -> list[str]:
+def make_dated(inpath: Path, today: Date = Date.today()) -> tuple[Path, list[str]]:
     """Copy and rename `inpath` as necessary to apply the filename convention.
 
     Log what happened to `stderr`.
+
+    Return `new_dest` (path to the new file) and `operations` (list of strings
+    describing filesystem operations taken).
     """
     if not inpath.exists():
         raise FileNotFoundError(f"{inpath} doesn't exist")
@@ -120,17 +124,22 @@ def make_dated(inpath: Path, today: Date = Date.today()) -> list[str]:
         raise ValueError(f"{inpath} is neither a file nor a directory")
     stdout.write(f"{new_dest}\n")
 
-    return operations
+    return new_dest, operations
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a new copy of a file or directory with today's date as a prefix"
     )
-    parser.add_argument("inpath", help="Input file/directory to dated")
+    parser.add_argument("inpath", help="File/directory whose name should be updated")
+    parser.add_argument(
+        "--open", "-o", action="store_true", help="xdg-open the new file"
+    )
     parsed = parser.parse_args()
     inpath = Path(parsed.inpath)
-    make_dated(inpath)
+    new_dest, _ = make_dated(inpath)
+    if parsed.open:
+        Popen(["xdg-open", str(new_dest)])
 
 
 if __name__ == "__main__":
